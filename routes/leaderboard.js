@@ -10,11 +10,9 @@ var assert      = require ( 'assert' )        ,
 
 exports.leaderboard = function ( req , res ) {
     var mongoClient = new MongoClient ( new MongoServer ( settings.host , settings.port ) , {w : 1} ),
-        userScoreboard = [],
-        topScorers = [],
+        userScoreboard = { complete: false, entries: [] },
+        topScorers = { complete: false, entries: [] },
         loggedInUser;
-
-    console.log(req.params.user);
     mongoClient.open (
         function ( err , mongoClient ) {
             assert.equal(null,err);
@@ -27,39 +25,30 @@ exports.leaderboard = function ( req , res ) {
                 } );
 
             userData.find ( {} ,
-                {
-                    "sort"  : [ ['score', 'desc'] ]
-                } ,
+                { "sort"  : [ ['score', 'desc'] ]} ,
                 function ( err , records ) {
                     assert.equal ( null , err );
 
                     records.each (
                         function ( err , record ) {
-                            if ( record == null 
-                                || (loggedInUser != null && userScoreboard.indexOf(loggedInUser) == 3)) {
+                            if ( record == null || (userScoreboard.complete && topScorers.complete)) {
                                 
                                 mongoClient.close ();
-
+                                
                                 res.render ( 'leaderboard' , {
                                     title : "FaceGame Leaderboard" ,
-                                    userScoreboard : loggedInUser == null ? null : userScoreboard,
-                                    topScorers : topScorers,
+                                    userScoreboard : userScoreboard.complete ? userScoreboard.entries : null,
+                                    topScorers : topScorers.entries,
                                     currentUser : loggedInUser == null ? '' : loggedInUser.username
                                 } );
                             }
                             else {
-                                userScoreboard.push( record );
-                                
-                                if( userScoreboard.length > 7 ){
-                                    userScoreboard.shift();
-                                }
 
-                                if( record.username == req.params.user){ 
+                                buildUserScoreboard(record, userScoreboard, loggedInUser);
+                                buildTopScorers(record, topScorers);
+
+                                if( record.username == req.params.user ){ 
                                     loggedInUser  = record;
-                                }
-
-                                if( topScorers.length < 10){
-                                    topScorers.push( record );
                                 }
                             }
                         } );
@@ -67,3 +56,28 @@ exports.leaderboard = function ( req , res ) {
         }
     );
 };
+
+function buildUserScoreboard(record, userScoreboard, loggedInUser){
+    if(userScoreboard.complete){
+        return;
+    }
+
+    userScoreboard.entries.push( record );
+    
+    if( userScoreboard.entries.length > 7 ){
+        userScoreboard.entries.shift();
+    }
+
+    if(loggedInUser != null && userScoreboard.entries.indexOf(loggedInUser) == 3){
+        userScoreboard.complete = true;
+    }
+};
+
+function buildTopScorers(record, topScorers){
+    if( topScorers.entries.length < 10 ){
+        topScorers.entries.push( record );
+    }
+    else{
+        topScorers.complete = true;
+    }
+}
