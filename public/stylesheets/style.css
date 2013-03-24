@@ -73,6 +73,7 @@ table.leaderboard{
     margin-left:1em;
     font-size:2em;
     padding-top:21px;
+    border-collapse: collapse;
 }
 
 table.leaderboard tr {
@@ -87,4 +88,6 @@ table.leaderboard tr td.user{
     padding-top:3px;
 }
 
-
+table.leaderboard tr.current-user{
+    background-color: #CCCCCC;
+}

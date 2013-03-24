@@ -1,16 +1,30 @@
 extends layout
 
 block content
-    h1(class='leaderboard') Top Knowers
-        img(class='shield',src='/images/DragonShield.jpg')
-    span(class='info') ( of all time )
+    h1.leaderboard Top Knowers
+        img.shield(src='/images/DragonShield.jpg')
+    span.info ( of all time )
     
-    table(class='leaderboard')
+    table.leaderboard
         tr
             th User
             th Score
         
-        each user in users
+        each user in topScorers
+            tr(class= (user.username == currentUser) ? 'current-user' : '')
+                td.user= user.username
+                td.score= user.score
+    
+    if(currentUser != '')
+        h1.leaderboard Your Scoreboard
+            img.shield(src='/images/DragonShield.jpg')
+            
+        table.leaderboard
             tr
-                td(class='user')=user.username
-                td(class='score')=user.score
+                th User
+                th Score
+            
+            each user in userScoreboard
+                tr(class= (user.username == currentUser) ? 'current-user' : '')
+                    td.user= user.username
+                    td.score= user.score

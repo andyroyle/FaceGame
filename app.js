@@ -55,7 +55,7 @@ app.configure ( 'development' , function () {
 app.all ( '/' , routes.login );
 app.all ( '/quiz/:user' , routes.quiz );
 app.all ( '/user/:user/vote/:voted' , routes.vote );
-app.all ( '/leaderboard' , routes.leaderboard );
+app.all ( '/leaderboard/:user?' , routes.leaderboard );
 
 http.createServer ( app ).listen ( app.get ( 'port' ) , function () {
     console.log ( "Express server listening on port " + app.get ( 'port' ) );

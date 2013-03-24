@@ -10,8 +10,11 @@ var assert      = require ( 'assert' )        ,
 
 exports.leaderboard = function ( req , res ) {
     var mongoClient = new MongoClient ( new MongoServer ( settings.host , settings.port ) , {w : 1} ),
-        userList = [];
+        userScoreboard = [],
+        topScorers = [],
+        loggedInUser;
 
+    console.log(req.params.user);
     mongoClient.open (
         function ( err , mongoClient ) {
             assert.equal(null,err);
@@ -25,7 +28,6 @@ exports.leaderboard = function ( req , res ) {
 
             userData.find ( {} ,
                 {
-                    "limit" : 10 ,
                     "sort"  : [ ['score', 'desc'] ]
                 } ,
                 function ( err , records ) {
@@ -33,16 +35,32 @@ exports.leaderboard = function ( req , res ) {
 
                     records.each (
                         function ( err , record ) {
-                            if ( record == null ) {
+                            if ( record == null 
+                                || (loggedInUser != null && userScoreboard.indexOf(loggedInUser) == 3)) {
+                                
                                 mongoClient.close ();
 
                                 res.render ( 'leaderboard' , {
                                     title : "FaceGame Leaderboard" ,
-                                    users : userList
+                                    userScoreboard : loggedInUser == null ? null : userScoreboard,
+                                    topScorers : topScorers,
+                                    currentUser : loggedInUser == null ? '' : loggedInUser.username
                                 } );
                             }
                             else {
-                                userList.push ( record );
+                                userScoreboard.push( record );
+                                
+                                if( userScoreboard.length > 7 ){
+                                    userScoreboard.shift();
+                                }
+
+                                if( record.username == req.params.user){ 
+                                    loggedInUser  = record;
+                                }
+
+                                if( topScorers.length < 10){
+                                    topScorers.push( record );
+                                }
                             }
                         } );
                 } );
