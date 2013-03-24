@@ -34,22 +34,23 @@ exports.leaderboard = function ( req , res ) {
                             if ( record == null || (userScoreboard.complete && topScorers.complete)) {
                                 
                                 mongoClient.close ();
-                                
+
                                 res.render ( 'leaderboard' , {
                                     title : "FaceGame Leaderboard" ,
                                     userScoreboard : userScoreboard.complete ? userScoreboard.entries : null,
                                     topScorers : topScorers.entries,
-                                    currentUser : loggedInUser == null ? '' : loggedInUser.username
+                                    currentUser : loggedInUser == null ? '' : loggedInUser.username,
+                                    trophies : [ 'gold', 'silver', 'bronze' ]
                                 } );
                             }
                             else {
 
-                                buildUserScoreboard(record, userScoreboard, loggedInUser);
-                                buildTopScorers(record, topScorers);
-
                                 if( record.username == req.params.user ){ 
                                     loggedInUser  = record;
                                 }
+
+                                buildUserScoreboard(record, userScoreboard, loggedInUser);
+                                buildTopScorers(record, topScorers);
                             }
                         } );
                 } );
@@ -68,7 +69,9 @@ function buildUserScoreboard(record, userScoreboard, loggedInUser){
         userScoreboard.entries.shift();
     }
 
-    if(loggedInUser != null && userScoreboard.entries.indexOf(loggedInUser) == 3){
+    if(loggedInUser != null 
+       && userScoreboard.entries.length == 7
+       && userScoreboard.entries.indexOf(loggedInUser) > -1) {
         userScoreboard.complete = true;
     }
 };
