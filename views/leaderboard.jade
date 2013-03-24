@@ -7,11 +7,13 @@ block content
     
     table.leaderboard
         tr
+            th &nbsp;
             th User
             th Score
         
         each user in topScorers
             tr(class= (user.username == currentUser) ? 'current-user' : '')
+                td(class= 'trophy ' + trophies[topScorers.indexOf(user)])
                 td.user= user.username
                 td.score= user.score
     

@@ -91,3 +91,21 @@ table.leaderboard tr td.user{
 table.leaderboard tr.current-user{
     background-color: #CCCCCC;
 }
+
+table.leaderboard tr td.trophy {
+    background-image: url('/images/trophies.png');
+    width: 43px;
+    height: 40px;
+}
+
+table.leaderboard tr td.gold {
+    background-position: 93px 0px;
+}
+
+table.leaderboard tr td.silver {
+    background-position: 138px 0px;
+}
+
+table.leaderboard tr td.bronze {
+    background-position: 45px 0px;
+}
