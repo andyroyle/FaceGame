@@ -62,6 +62,9 @@ vows.describe ( 'Viewing the leaderboard' ).addBatch ( {
         },
         "the userScoreboard list should contain 7 users" : function (topic) {
             assert.strictEqual ( resMock.render.firstCall.args[1].userScoreboard.length, 7 );
+        },
+        "the currentUser should be set" : function (topic) {
+            assert.strictEqual ( resMock.render.firstCall.args[1].currentUser, "someuser" );
         }
     }
 } ).addBatch ( {
@@ -74,6 +77,9 @@ vows.describe ( 'Viewing the leaderboard' ).addBatch ( {
         "the userScoreboard list should be null" : function (topic) {
             console.log(resMock.render.firstCall.args[1].userScoreboard);
             assert.strictEqual( resMock.render.firstCall.args[1].userScoreboard, null );
+        },
+        "the currentUser should not be set" : function (topic) {
+            assert.strictEqual ( resMock.render.firstCall.args[1].currentUser, "" );
         }
     }
 } ).export ( module );
