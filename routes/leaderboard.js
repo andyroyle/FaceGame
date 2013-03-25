@@ -71,7 +71,7 @@ function buildUserScoreboard(scores, indexOfLoggedInUser){
         return scores.slice(0, 7);
     }
 
-    if(indexOfLoggedInUser > scores.length - 2){
+    if(indexOfLoggedInUser > scores.length - 4){
         return scores.slice(-7);
     }
 
