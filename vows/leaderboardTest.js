@@ -160,7 +160,7 @@ vows.describe ( 'Viewing the leaderboard' ).addBatch ( {
                 { username : "user7" , score : 30}
             ]
 
-            assert.strictEqual ( resMock.render.lastCall.args[1].userScoreboard, expected );
+            assert.deepEqual ( resMock.render.lastCall.args[1].userScoreboard, expected );
         }
     }
 } ).addBatch ( {

@@ -10,9 +10,9 @@ var assert      = require ( 'assert' )        ,
 
 exports.leaderboard = function ( req , res ) {
     var mongoClient = new MongoClient ( new MongoServer ( settings.host , settings.port ) , {w : 1} ),
-        userScoreboard = { complete: false, entries: [] },
-        topScorers = { complete: false, entries: [] },
+        scores = [],
         loggedInUser;
+
     mongoClient.open (
         function ( err , mongoClient ) {
             assert.equal(null,err);
@@ -28,59 +28,52 @@ exports.leaderboard = function ( req , res ) {
                 { "sort"  : [ ['score', 'desc'] ]} ,
                 function ( err , records ) {
                     assert.equal ( null , err );
-
-                    records.each (
-                        function ( err , record ) {
-                            if ( record == null || (userScoreboard.complete && topScorers.complete)) {
-                                
-                                mongoClient.close ();
-
-                                res.render ( 'leaderboard' , {
-                                    title : "FaceGame Leaderboard" ,
-                                    userScoreboard : userScoreboard.complete ? userScoreboard.entries : null,
-                                    topScorers : topScorers.entries,
-                                    currentUser : loggedInUser == null ? '' : loggedInUser.username,
-                                    trophies : [ 'gold', 'silver', 'bronze' ]
-                                } );
+                    records.each (function ( err , record ) {
+                        if ( record == null ) {
+                            mongoClient.close ();
+                            buildScoreBoards(scores, loggedInUser, req, res);
+                        }
+                        else {
+                            if( record.username == req.params.user ){ 
+                                loggedInUser  = record;
                             }
-                            else {
-
-                                if( record.username == req.params.user ){ 
-                                    loggedInUser  = record;
-                                }
-
-                                buildUserScoreboard(record, userScoreboard, loggedInUser);
-                                buildTopScorers(record, topScorers);
-                            }
-                        } );
+                            scores.push(record);
+                        }
+                    });
                 } );
         }
     );
 };
 
-function buildUserScoreboard(record, userScoreboard, loggedInUser){
-    if(userScoreboard.complete){
-        return;
-    }
+function buildScoreBoards(scores, loggedInUser, req, res){
+    var indexOfLoggedInUser = scores.indexOf(loggedInUser);
 
-    userScoreboard.entries.push( record );
-    
-    if( userScoreboard.entries.length > 7 ){
-        userScoreboard.entries.shift();
-    }
-
-    if(loggedInUser != null 
-       && userScoreboard.entries.length == 7
-       && userScoreboard.entries.indexOf(loggedInUser) > -1) {
-        userScoreboard.complete = true;
-    }
-};
-
-function buildTopScorers(record, topScorers){
-    if( topScorers.entries.length < 10 ){
-        topScorers.entries.push( record );
-    }
-    else{
-        topScorers.complete = true;
-    }
+    res.render ( 'leaderboard' , {
+        title : "FaceGame Leaderboard" ,
+        userScoreboard : buildUserScoreboard(scores, indexOfLoggedInUser),
+        topScorers : scores.slice(0, 10),
+        currentUser : loggedInUser == null ? '' : loggedInUser.username,
+        trophies : [ 'gold', 'silver', 'bronze' ]
+    } );
 }
+
+function buildUserScoreboard(scores, indexOfLoggedInUser){
+    
+    if(indexOfLoggedInUser < 0) {
+        return null;
+    }
+
+    if(scores.length <= 7){
+        return scores;
+    }
+
+    if(indexOfLoggedInUser < 3){
+        return scores.slice(0, 7);
+    }
+
+    if(indexOfLoggedInUser > scores.length - 2){
+        return scores.slice(-7);
+    }
+
+    return scores.slice(indexOfLoggedInUser - 3, indexOfLoggedInUser + 4);
+};
