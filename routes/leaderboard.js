@@ -46,11 +46,9 @@ exports.leaderboard = function ( req , res ) {
 };
 
 function buildScoreBoards(scores, loggedInUser, req, res){
-    var indexOfLoggedInUser = scores.indexOf(loggedInUser);
-
     res.render ( 'leaderboard' , {
         title : "FaceGame Leaderboard" ,
-        userScoreboard : buildUserScoreboard(scores, indexOfLoggedInUser),
+        userScoreboard : buildUserScoreboard(scores, scores.indexOf(loggedInUser)),
         topScorers : scores.slice(0, 10),
         currentUser : loggedInUser == null ? '' : loggedInUser.username,
         trophies : [ 'gold', 'silver', 'bronze' ]
